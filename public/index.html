@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Home Shortlist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --purple: #582c83; --purple-deep: #3d1e5c; --purple-pale: #ede7f4;
+  --green-deep: #7ba428; --green-pale: #f0f5de;
+  --page: #f8f6fb; --surface: #ffffff; --tint: #f8f6fb;
+  --text: #1a1523; --muted: #5a5266; --border: #e4e0ea; --border-strong: #c9c2d6;
+  --accent-text: #582c83; --life-border: #7ba428;
+  --font-display: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #131019; --surface: #211a2e; --tint: #1a1523;
+    --text: #f4f1fa; --muted: #ada4bc; --border: #382e4b; --border-strong: #4e4166;
+    --accent-text: #c0a6e8; --green-pale: #20301a; --life-border: #9dc73b; --purple-pale: #2f2542;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #131019; --surface: #211a2e; --tint: #1a1523;
+  --text: #f4f1fa; --muted: #ada4bc; --border: #382e4b; --border-strong: #4e4166;
+  --accent-text: #c0a6e8; --green-pale: #20301a; --life-border: #9dc73b; --purple-pale: #2f2542;
+  color-scheme: dark;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+
+.wrap { max-width: 1200px; margin: 0 auto; padding: 32px 20px 56px; display: flex; flex-direction: column; gap: 24px; }
+
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.intro { display: flex; flex-direction: column; gap: 10px; flex: 1 1 420px; min-width: 0; }
+.kicker { font-size: 13px; font-weight: 600; color: var(--accent-text); }
+h1 { margin: 0; font-family: var(--font-serif); font-weight: 600; font-size: clamp(26px, 4vw, 34px); line-height: 1.15; }
+.lede { margin: 0; font-size: 15px; line-height: 1.5; color: var(--muted); }
+.status { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); flex-shrink: 0; }
+.status[data-state="shared"] .dot { background: var(--green-deep); }
+.status[data-state="saving"] .dot { background: #fdca0b; }
+
+.btn { min-height: 44px; padding: 0 18px; border-radius: 5px; border: 1px solid transparent; cursor: pointer; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background-color .15s, border-color .15s; }
+.btn-ghost { background: transparent; color: var(--accent-text); }
+.btn-ghost:hover { background: var(--purple-pale); }
+.btn-outline { background: var(--surface); color: var(--accent-text); border-color: var(--border-strong); }
+.btn-outline:hover { border-color: var(--accent-text); }
+.btn-life { background: #9dc73b; color: #1a1523; border-color: #9dc73b; }
+.btn-life:hover { background: #8fb732; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+.tabs-box { overflow-x: auto; border-bottom: 1px solid var(--border); scrollbar-width: thin; }
+.tabs { display: flex; gap: 4px; min-width: max-content; }
+.tab { min-height: 46px; padding: 0 14px; background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; color: var(--muted); font-weight: 600; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.tab:hover { color: var(--text); }
+.tab[aria-selected="true"] { color: var(--accent-text); border-bottom-color: var(--accent-text); }
+.tab .count { font-weight: 500; opacity: .75; }
+.tab .picked { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green-deep); margin-left: 6px; vertical-align: middle; }
+
+.layout { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.list-col { flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.list-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: -0.01em; }
+.meta { font-size: 13px; color: var(--muted); }
+
+ol.items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); transition: background-color .2s, border-color .2s; }
+.item.preferred { border-color: var(--life-border); background: var(--green-pale); }
+.item.moved { animation: moved .45s ease-out; }
+@keyframes moved { from { box-shadow: 0 0 0 3px var(--purple-pale); } to { box-shadow: 0 0 0 0 transparent; } }
+@media (prefers-reduced-motion: reduce) { .item.moved { animation: none; } * { transition: none !important; } }
+.item-main { display: flex; align-items: center; gap: 16px; flex: 1 1 300px; min-width: 0; }
+.rank { width: 52px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.rank-n { font-family: var(--font-display); font-weight: 800; font-size: 28px; line-height: 1; color: var(--accent-text); }
+.rank-l { font-size: 11px; font-weight: 600; color: var(--muted); min-height: 14px; }
+.info { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.name { font-size: 16px; font-weight: 600; line-height: 1.3; }
+.specs { display: flex; flex-wrap: wrap; gap: 6px; }
+.spec { font-size: 12px; font-weight: 500; padding: 3px 8px; border-radius: 5px; background: var(--tint); border: 1px solid var(--border); color: var(--muted); }
+.item-side { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; flex: 1 1 auto; }
+.price { font-family: var(--font-display); font-weight: 700; font-size: 18px; white-space: nowrap; margin-right: 4px; }
+.movers { display: flex; gap: 6px; }
+.icon-btn { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-strong); border-radius: 5px; background: var(--surface); color: var(--accent-text); cursor: pointer; }
+.icon-btn:hover:not([disabled]) { border-color: var(--accent-text); }
+.icon-btn[disabled] { opacity: .35; cursor: not-allowed; }
+.pref-btn { min-width: 140px; }
+
+aside { flex: 1 1 300px; min-width: 0; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.card h2 { font-size: 18px; }
+ul.picks { list-style: none; margin: 0; padding: 0; }
+ul.picks li { border-top: 1px solid var(--border); }
+.pick-btn { width: 100%; min-height: 52px; padding: 10px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: none; border: 0; cursor: pointer; text-align: left; color: var(--text); }
+.pick-btn:hover .pick-name { color: var(--accent-text); }
+.pick-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pick-cat { font-size: 12px; font-weight: 600; color: var(--muted); }
+.pick-name { font-size: 14px; font-weight: 600; }
+.pick-name.none { font-weight: 400; color: var(--muted); }
+.pick-price { font-family: var(--font-display); font-weight: 700; font-size: 14px; white-space: nowrap; }
+.total { border-top: 1px solid var(--border-strong); padding-top: 14px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.total span:first-child { font-size: 14px; font-weight: 600; }
+.total-n { font-family: var(--font-display); font-weight: 800; font-size: 22px; color: var(--accent-text); }
+
+.dialog-backdrop { position: fixed; inset: 0; background: rgba(26,21,35,.45); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 10; }
+.dialog-backdrop.open { display: flex; }
+.dialog { background: var(--surface); color: var(--text); border-radius: 12px; padding: 24px; max-width: 420px; width: 100%; display: flex; flex-direction: column; gap: 14px; }
+.dialog h2 { font-size: 18px; }
+.dialog p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.btn-danger { background: #c0392b; color: #fff; }
+.btn-danger:hover { background: #a82c1e; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="intro">
+      <span class="kicker">Home setup shortlist</span>
+      <h1>Rank each category, then mark the one you would buy.</h1>
+      <p class="lede">Top of the list is your highest priority. Use the arrows to reorder.</p>
+      <div class="status" id="status" data-state="local" role="status" aria-live="polite"><span class="dot"></span><span id="status-text">Loading saved choices…</span></div>
+    </div>
+    <button type="button" class="btn btn-ghost" id="reset-btn">Reset all rankings</button>
+  </header>
+
+  <div class="tabs-box">
+    <div class="tabs" role="tablist" aria-label="Categories" id="tabs"></div>
+  </div>
+
+  <div class="layout">
+    <section class="list-col" role="tabpanel" id="panel" aria-labelledby="cat-heading">
+      <div class="list-head">
+        <h2 id="cat-heading"></h2>
+        <span class="meta" id="cat-meta"></span>
+      </div>
+      <ol class="items" id="items"></ol>
+    </section>
+
+    <aside aria-labelledby="picks-heading">
+      <div class="card">
+        <div>
+          <h2 id="picks-heading">Your preferred picks</h2>
+          <span class="meta" id="picked-count"></span>
+        </div>
+        <ul class="picks" id="picks"></ul>
+        <div class="total"><span>Total of picks</span><span class="total-n" id="total"></span></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="dialog-backdrop" id="confirm" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+  <div class="dialog">
+    <h2 id="confirm-title">Reset everything?</h2>
+    <p>This puts every category back in its original order and clears all preferred picks for everyone using this link.</p>
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-outline" id="confirm-cancel">Keep my choices</button>
+      <button type="button" class="btn btn-danger" id="confirm-ok">Reset all</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var CATALOG = [
+    { id: 'fridges', label: 'Fridges', items: [
+      { id: 'f1', name: 'Ramtons Fridge', specs: ['2 doors', '1-yr warranty'], price: 27995 },
+      { id: 'f2', name: 'Hisense Fridge', specs: ['179 L', '5-yr warranty'], price: 31895 },
+      { id: 'f3', name: 'Ramtons Fridge', specs: ['1 door', '90 L', '1-yr warranty'], price: 22995 },
+      { id: 'f4', name: 'Von Fridge', specs: ['1 door', '90 L', '1-yr warranty'], price: 21095 },
+      { id: 'f5', name: 'Oryx Fridge', specs: ['1 door', '90 L', '1-yr warranty'], price: 18995 },
+      { id: 'f6', name: 'Mika Fridge', specs: ['1 door', '90 L', '1-yr warranty'], price: 17995 } ] },
+    { id: 'guards', label: 'Fridge guards', items: [
+      { id: 'g1', name: 'Ramtons Fridge Guard', specs: ['5 A'], price: 2370 },
+      { id: 'g2', name: 'Ramtons Fridge Guard', specs: ['7 A'], price: 2595 } ] },
+    { id: 'washers', label: 'Washing machines', items: [
+      { id: 'w1', name: 'Midea Washing Machine', specs: ['8 kg', '10-yr warranty'], price: 54994 },
+      { id: 'w2', name: 'Ramtons Washing Machine', specs: ['8 kg', '1-yr warranty'], price: 47999 },
+      { id: 'w3', name: 'Samsung Washing Machine', specs: ['10 kg', '10-yr warranty'], price: 88995 } ] },
+    { id: 'cookers', label: 'Cookers', items: [
+      { id: 'c1', name: 'Ramtons Cooker', specs: ['With oven', '1-yr warranty'], price: 35999 },
+      { id: 'c2', name: 'Haier Cooker, stainless steel', specs: ['With oven', '2-yr warranty'], price: 48160 },
+      { id: 'c3', name: 'Haier Cooker', specs: ['With oven', '1-yr warranty'], price: 38750 },
+      { id: 'c4', name: 'Midea Cooker', specs: ['With oven', '1-yr warranty'], price: 36995 },
+      { id: 'c5', name: 'Midea Cooker', specs: ['Gas oven', '1-yr warranty'], price: 17995 } ] },
+    { id: 'burners', label: 'Gas burners', items: [
+      { id: 'b1', name: 'Ramtons Burner', specs: ['2 gas'], price: 8100 },
+      { id: 'b2', name: 'Mika Burner', specs: ['2 gas'], price: 6995 },
+      { id: 'b3', name: 'Mika Burner', specs: ['3 gas'], price: 8795 } ] },
+    { id: 'bedding', label: 'Bedding', items: [
+      { id: 'd1', name: 'CZen Mattress', specs: ['6x6', 'Orthopaedic'], price: 46995 },
+      { id: 'd2', name: 'TX Mattress', specs: ['6x6', 'Orthopaedic'], price: 33995 },
+      { id: 'd3', name: 'Duvet', specs: ['6x6'], price: 2100 },
+      { id: 'd4', name: 'Pillow', specs: ['1 pc'], price: 595 } ] },
+    { id: 'dining', label: 'Dining tables', items: [
+      { id: 't1', name: 'GFL Dining Table', specs: ['4 seats'], price: 19795 },
+      { id: 't2', name: 'Mahogany Dining Table', specs: ['6 seats'], price: 89900 } ] },
+    { id: 'microwaves', label: 'Microwaves', items: [
+      { id: 'm1', name: 'Midea Microwave', specs: ['2-yr warranty'], price: 8995 },
+      { id: 'm2', name: 'Ramtons Microwave', specs: [], price: 8710 },
+      { id: 'm3', name: 'Mika Microwave', specs: [], price: 10395 },
+      { id: 'm4', name: 'Hisense Microwave', specs: [], price: 9095 },
+      { id: 'm5', name: 'Samsung Microwave', specs: [], price: 21995 },
+      { id: 'm6', name: 'LG Microwave', specs: [], price: 12995 },
+      { id: 'm7', name: 'Haier Microwave', specs: [], price: 8999 } ] }
+  ];
+  var LOCAL_KEY = 'home-shortlist-v1';
+  var DOC_PATH = 'shortlist/state';
+
+  function defaultOrder() {
+    var o = {};
+    CATALOG.forEach(function (c) { o[c.id] = c.items.map(function (i) { return i.id; }); });
+    return o;
+  }
+  function kes(n) { return 'KES ' + n.toLocaleString('en-KE'); }
+
+  // Accept stored data only if it matches the catalogue exactly.
+  function sanitize(raw) {
+    var out = { order: defaultOrder(), pref: {} };
+    if (!raw || typeof raw !== 'object') return out;
+    CATALOG.forEach(function (c) {
+      var ids = c.items.map(function (i) { return i.id; });
+      var o = raw.order && raw.order[c.id];
+      if (Array.isArray(o) && o.length === ids.length && ids.every(function (id) { return o.indexOf(id) !== -1; })) {
+        out.order[c.id] = o.slice();
+      }
+      var p = raw.pref && raw.pref[c.id];
+      if (typeof p === 'string' && ids.indexOf(p) !== -1) out.pref[c.id] = p;
+    });
+    return out;
+  }
+
+  var state = sanitize(null);
+  var active = 'fridges';
+  var lastMoved = null;
+  var saveTimer = null, mode = 'local';
+
+  function setStatus(kind, text) {
+    var el = document.getElementById('status');
+    el.setAttribute('data-state', kind);
+    document.getElementById('status-text').textContent = text;
+  }
+
+  function loadLocal() {
+    try { var s = localStorage.getItem(LOCAL_KEY); if (s) state = sanitize(JSON.parse(s)); } catch (e) {}
+  }
+  function saveLocal() {
+    try { localStorage.setItem(LOCAL_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  var persist = function () { saveLocal(); };
+
+  function move(catId, idx, dir) {
+    var list = state.order[catId].slice();
+    var j = idx + dir;
+    if (j < 0 || j >= list.length) return;
+    var t = list[idx]; list[idx] = list[j]; list[j] = t;
+    state.order[catId] = list;
+    lastMoved = { id: t, dir: dir };
+    render();
+    persist();
+  }
+  function togglePref(catId, id) {
+    if (state.pref[catId] === id) delete state.pref[catId]; else state.pref[catId] = id;
+    render();
+    persist();
+  }
+
+  function el(tag, attrs, children) {
+    var n = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (k === 'class') n.className = attrs[k];
+      else if (k === 'text') n.textContent = attrs[k];
+      else if (k.slice(0, 2) === 'on') n.addEventListener(k.slice(2), attrs[k]);
+      else if (attrs[k] === true) n.setAttribute(k, '');
+      else if (attrs[k] !== false && attrs[k] != null) n.setAttribute(k, attrs[k]);
+    });
+    (children || []).forEach(function (c) { if (c) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return n;
+  }
+  function chevron(up) {
+    var ns = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('width', '18'); svg.setAttribute('height', '18'); svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '1.75');
+    svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round'); svg.setAttribute('aria-hidden', 'true');
+    var p = document.createElementNS(ns, 'path');
+    p.setAttribute('d', up ? 'M18 15l-6-6-6 6' : 'M6 9l6 6 6-6');
+    svg.appendChild(p);
+    return svg;
+  }
+
+  function renderTabs() {
+    var box = document.getElementById('tabs');
+    box.textContent = '';
+    CATALOG.forEach(function (c) {
+      var sel = c.id === active;
+      var b = el('button', {
+        type: 'button', role: 'tab', class: 'tab', id: 'tab-' + c.id,
+        'aria-selected': sel ? 'true' : 'false', 'aria-controls': 'panel', tabindex: sel ? '0' : '-1',
+        onclick: function () { active = c.id; lastMoved = null; render(); }
+      }, [c.label + ' ', el('span', { class: 'count', text: '(' + c.items.length + ')' }),
+          state.pref[c.id] ? el('span', { class: 'picked', 'aria-label': 'pick chosen', title: 'Pick chosen' }) : null]);
+      box.appendChild(b);
+    });
+  }
+
+  function renderList() {
+    var cat = CATALOG.filter(function (c) { return c.id === active; })[0];
+    var byId = {};
+    cat.items.forEach(function (i) { byId[i.id] = i; });
+    var ids = state.order[cat.id], n = ids.length;
+    var prices = cat.items.map(function (i) { return i.price; });
+    document.getElementById('cat-heading').textContent = cat.label;
+    document.getElementById('cat-meta').textContent = n + ' items, ' + kes(Math.min.apply(null, prices)) + ' to ' + kes(Math.max.apply(null, prices));
+    var ol = document.getElementById('items');
+    ol.textContent = '';
+    var focusAfter = null;
+    ids.forEach(function (id, idx) {
+      var it = byId[id];
+      var preferred = state.pref[cat.id] === id;
+      var upBtn = el('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Move ' + it.name + ' up', disabled: idx === 0, onclick: function () { move(cat.id, idx, -1); } }, [chevron(true)]);
+      var downBtn = el('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Move ' + it.name + ' down', disabled: idx === n - 1, onclick: function () { move(cat.id, idx, 1); } }, [chevron(false)]);
+      if (lastMoved && lastMoved.id === id) {
+        focusAfter = lastMoved.dir < 0 ? (idx === 0 ? downBtn : upBtn) : (idx === n - 1 ? upBtn : downBtn);
+      }
+      var li = el('li', { class: 'item' + (preferred ? ' preferred' : '') + (lastMoved && lastMoved.id === id ? ' moved' : '') }, [
+        el('div', { class: 'item-main' }, [
+          el('div', { class: 'rank' }, [
+            el('span', { class: 'rank-n', text: String(idx + 1) }),
+            el('span', { class: 'rank-l', text: idx === 0 ? 'Highest' : (idx === n - 1 ? 'Lowest' : '') })
+          ]),
+          el('div', { class: 'info' }, [
+            el('span', { class: 'name', text: it.name }),
+            it.specs.length ? el('div', { class: 'specs' }, it.specs.map(function (s) { return el('span', { class: 'spec', text: s }); })) : null
+          ])
+        ]),
+        el('div', { class: 'item-side' }, [
+          el('span', { class: 'price', text: kes(it.price) }),
+          el('div', { class: 'movers' }, [upBtn, downBtn]),
+          el('button', { type: 'button', class: 'btn pref-btn ' + (preferred ? 'btn-life' : 'btn-outline'), 'aria-pressed': preferred ? 'true' : 'false', onclick: function () { togglePref(cat.id, id); } }, [preferred ? 'Preferred' : 'Mark preferred'])
+        ])
+      ]);
+      ol.appendChild(li);
+    });
+    if (focusAfter) focusAfter.focus({ preventScroll: true });
+  }
+
+  function renderPicks() {
+    var ul = document.getElementById('picks');
+    ul.textContent = '';
+    var total = 0, picked = 0;
+    CATALOG.forEach(function (c) {
+      var pid = state.pref[c.id];
+      var it = c.items.filter(function (i) { return i.id === pid; })[0];
+      if (it) { total += it.price; picked++; }
+      ul.appendChild(el('li', null, [
+        el('button', { type: 'button', class: 'pick-btn', onclick: function () { active = c.id; lastMoved = null; render(); document.getElementById('cat-heading').scrollIntoView({ behavior: 'smooth', block: 'start' }); } }, [
+          el('span', { class: 'pick-txt' }, [
+            el('span', { class: 'pick-cat', text: c.label }),
+            el('span', { class: 'pick-name' + (it ? '' : ' none'), text: it ? it.name + (it.specs.length ? ', ' + it.specs[0] : '') : 'Not chosen yet' })
+          ]),
+          el('span', { class: 'pick-price', text: it ? kes(it.price) : '–' })
+        ])
+      ]));
+    });
+    document.getElementById('picked-count').textContent = picked + ' of ' + CATALOG.length + ' categories picked';
+    document.getElementById('total').textContent = kes(total);
+  }
+
+  function render() { renderTabs(); renderList(); renderPicks(); lastMoved = null; }
+
+  // Keyboard: arrow keys move between tabs.
+  document.getElementById('tabs').addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    var i = CATALOG.findIndex(function (c) { return c.id === active; });
+    i = (i + (e.key === 'ArrowRight' ? 1 : -1) + CATALOG.length) % CATALOG.length;
+    active = CATALOG[i].id; render();
+    document.getElementById('tab-' + active).focus();
+    e.preventDefault();
+  });
+
+  // Reset with confirmation.
+  var dlg = document.getElementById('confirm');
+  document.getElementById('reset-btn').addEventListener('click', function () { dlg.classList.add('open'); document.getElementById('confirm-cancel').focus(); });
+  document.getElementById('confirm-cancel').addEventListener('click', function () { dlg.classList.remove('open'); document.getElementById('reset-btn').focus(); });
+  dlg.addEventListener('keydown', function (e) { if (e.key === 'Escape') { dlg.classList.remove('open'); document.getElementById('reset-btn').focus(); } });
+  document.getElementById('confirm-ok').addEventListener('click', function () {
+    state = sanitize(null);
+    dlg.classList.remove('open');
+    render(); persist();
+    document.getElementById('reset-btn').focus();
+  });
+
+  loadLocal();
+  render();
+  setStatus('local', 'Saved on this device.');
+
+  // Shared storage via the site's API (Upstash Redis on Vercel).
+  var lastSeen = 0;
+  function applyRemote(data) {
+    if (!data || !data.state) return;
+    if (data.updatedAt && data.updatedAt <= lastSeen) return;
+    if (saveTimer) return; // a local change is about to be saved; keep it
+    lastSeen = data.updatedAt || 0;
+    state = sanitize(data.state);
+    saveLocal();
+    render();
+  }
+  function pull() {
+    return fetch('/api/state', { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw new Error('status ' + r.status);
+      return r.json();
+    }).then(function (data) {
+      mode = 'shared';
+      applyRemote(data);
+      if (!saveTimer) setStatus('shared', 'Saved. Everyone with the link sees the same choices.');
+    }).catch(function () {
+      mode = 'local';
+      setStatus('local', 'Shared list unavailable right now. Your changes are kept on this device.');
+    });
+  }
+  persist = function () {
+    saveLocal();
+    if (mode !== 'shared') return;
+    setStatus('saving', 'Saving…');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () {
+      fetch('/api/state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order: state.order, pref: state.pref })
+      }).then(function (r) {
+        if (!r.ok) throw new Error('status ' + r.status);
+        return r.json();
+      }).then(function (data) {
+        saveTimer = null;
+        lastSeen = data.updatedAt || lastSeen;
+        setStatus('shared', 'Saved. Everyone with the link sees the same choices.');
+      }).catch(function () {
+        saveTimer = null;
+        setStatus('local', 'Could not save to the shared list. Your changes are kept on this device; try again shortly.');
+      });
+    }, 400);
+  };
+  pull();
+  setInterval(function () { if (!document.hidden) pull(); }, 5000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) pull(); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "home-shortlist",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Household appliance shortlist: rank items per category and mark a preferred pick. Shared via Upstash Redis on Vercel."
+}
